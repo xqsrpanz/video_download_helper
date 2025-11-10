@@ -1,0 +1,11 @@
+{
+  "name": "video_download_helper",
+  "version": "1.0.0",
+  "description": "这是一个用于学习和拓展 Chrome 插件的视频下载助手模板。扩展会在匹配到指定 URL 时，自动向页面注入一个“下载视频”按钮，并预留了自定义下载逻辑的钩子。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
