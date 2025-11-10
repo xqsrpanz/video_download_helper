@@ -1,9 +1,9 @@
 const STORAGE_KEY = 'videoHelperUrlRules';
 const DEFAULT_RULES = [
   {
-    id: 'example',
-    description: '示例：匹配 example.com/watch',
-    pattern: 'https://example.com/watch*',
+    id: 'bilibili',
+    description: '匹配 bilibili.com 的所有视频页面',
+    pattern: 'https://bilibili.com/video*',
   },
 ];
 
@@ -142,4 +142,3 @@ async function loadRulesFromStorage() {
   const rules = stored[STORAGE_KEY] ?? DEFAULT_RULES;
   urlRules = compileRules(rules);
 }
-
