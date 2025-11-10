@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "Video Download Helper Starter",
+  "description": "在匹配特定网址时注入下载按钮，并触发自定义下载逻辑的基础模板。",
+  "version": "0.1.0",
+  "action": {
+    "default_title": "Video Download Helper",
+    "default_popup": "popup/popup.html"
+  },
+  "permissions": [
+    "tabs",
+    "scripting",
+    "downloads",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://example.com/*"
+  ],
+  "background": {
+    "service_worker": "background/index.js",
+    "type": "module"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "options_page": "options/options.html",
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "content_scripts/downloader.js",
+        "assets/styles/content.css"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}
+
