@@ -1,11 +1,4 @@
-const STORAGE_KEY = 'videoHelperUrlRules';
-const DEFAULT_RULES = [
-  {
-    id: 'bilibili',
-    description: '匹配 bilibili.com 的所有视频页面',
-    pattern: 'https://bilibili.com/video*',
-  },
-];
+import { STORAGE_KEY, DEFAULT_RULES } from '../public/constants.js';
 
 const form = document.getElementById('rules-form');
 const textarea = document.getElementById('rules-input');

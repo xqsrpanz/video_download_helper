@@ -1,26 +1,8 @@
-const STORAGE_KEY = 'videoHelperUrlRules';
-const DEFAULT_RULES = [
-  {
-    id: 'bilibili',
-    description: '匹配 bilibili.com 的所有视频页面',
-    pattern: 'https://bilibili.com/video*',
-  },
-];
+import { useRules } from '../public/utils.js';
 
-let urlRules = compileRules(DEFAULT_RULES);
+const { getMatchingRule } = await useRules();
 
 const injectedTabTracker = new Map();
-
-function getMatchingRule(url) {
-  return urlRules.find((rule) => {
-    try {
-      return rule.match(url);
-    } catch (error) {
-      console.warn(`[VideoHelper] URL 规则 ${rule.id} 执行失败：`, error);
-      return false;
-    }
-  });
-}
 
 async function ensureScriptsInjected(tabId, frameId = 0) {
   const tab = await chrome.tabs.get(tabId);
@@ -103,42 +85,3 @@ async function resolveDownloadUrl(tabId) {
 chrome.runtime.onInstalled.addListener(() => {
   console.info('[VideoHelper] 扩展已安装，等待匹配页面注入脚本。');
 });
-
-chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName === 'sync' && changes[STORAGE_KEY]) {
-    urlRules = compileRules(changes[STORAGE_KEY].newValue ?? DEFAULT_RULES);
-    console.info('[VideoHelper] 已更新 URL 规则配置。');
-  }
-});
-
-loadRulesFromStorage().catch((error) => {
-  console.error('[VideoHelper] 初始化规则失败，使用默认规则。', error);
-});
-
-function compileRules(rules = []) {
-  return rules.map((rule) => {
-    const { pattern, scripts = ['content_scripts/injector.js'] } = rule;
-    const urlPattern = pattern ?? '';
-    const matcher = buildMatcher(urlPattern);
-    return {
-      ...rule,
-      scripts,
-      match: matcher,
-    };
-  });
-}
-
-function buildMatcher(pattern) {
-  if (!pattern) {
-    return () => false;
-  }
-  const escaped = pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
-  const regex = new RegExp(`^${escaped}$`);
-  return (url) => regex.test(url);
-}
-
-async function loadRulesFromStorage() {
-  const stored = await chrome.storage.sync.get(STORAGE_KEY);
-  const rules = stored[STORAGE_KEY] ?? DEFAULT_RULES;
-  urlRules = compileRules(rules);
-}
