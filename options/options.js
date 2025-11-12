@@ -1,4 +1,4 @@
-import { STORAGE_KEY, DEFAULT_RULES } from '../public/constants.js';
+import { URL_RULES_STORAGE_KEY, DEFAULT_URL_RULES } from '../public/constants.js';
 
 const form = document.getElementById('rules-form');
 const textarea = document.getElementById('rules-input');
@@ -13,7 +13,7 @@ form?.addEventListener('submit', async (event) => {
   event.preventDefault();
   try {
     const rules = JSON.parse(textarea.value);
-    await chrome.storage.sync.set({ [STORAGE_KEY]: rules });
+    await chrome.storage.sync.set({ [URL_RULES_STORAGE_KEY]: rules });
     showStatus('保存成功');
   } catch (error) {
     console.error('[VideoHelper] 保存规则失败：', error);
@@ -22,8 +22,8 @@ form?.addEventListener('submit', async (event) => {
 });
 
 async function init() {
-  const stored = await chrome.storage.sync.get(STORAGE_KEY);
-  const rules = stored[STORAGE_KEY] ?? DEFAULT_RULES;
+  const stored = await chrome.storage.sync.get(URL_RULES_STORAGE_KEY);
+  const rules = stored[URL_RULES_STORAGE_KEY] ?? DEFAULT_URL_RULES;
   textarea.value = JSON.stringify(rules, null, 2);
 }
 

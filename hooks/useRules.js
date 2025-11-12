@@ -1,4 +1,5 @@
-import { STORAGE_KEY, DEFAULT_RULES } from './constants.js';
+import { err, info, warn } from '../utils/log.js';
+import { URL_RULES_STORAGE_KEY, DEFAULT_URL_RULES } from '../config/constants.js';
 
 export function buildMatcher(pattern) {
   if (!pattern) {
@@ -30,24 +31,24 @@ export function compileRules(rules = []) {
 
 export async function loadRules() {
   try {
-    const stored = await chrome.storage.sync.get(STORAGE_KEY);
-    let rules = DEFAULT_RULES;
-    if (stored[STORAGE_KEY]) {
-      rules = [...DEFAULT_RULES, ...stored[STORAGE_KEY]];
+    const stored = await chrome.storage.sync.get(URL_RULES_STORAGE_KEY);
+    let rules = DEFAULT_URL_RULES;
+    if (stored[URL_RULES_STORAGE_KEY]) {
+      rules = [...DEFAULT_URL_RULES, ...stored[URL_RULES_STORAGE_KEY]];
     }
     return compileRules(rules);
   } catch (error) {
-    console.error('[VideoHelper] 加载规则失败：', error);
-    return compileRules(DEFAULT_RULES);
+    err('Failed to Load Rules:', error);
+    return compileRules(DEFAULT_URL_RULES);
   }
 }
 
 export async function useRules() {
   let rules = await loadRules();
   chrome.storage.onChanged.addListener(async (changes, areaName) => {
-    if (areaName === 'sync' && changes[STORAGE_KEY]) {
+    if (areaName === 'sync' && changes[URL_RULES_STORAGE_KEY]) {
       rules = await loadRules();
-      console.info('[VideoHelper] 已更新 URL 规则配置。');
+      info('URL Rules Configuration Updated.');
     }
   });
   const getMatchingRule = (url) => {
@@ -55,7 +56,7 @@ export async function useRules() {
       try {
         return rule.match(url);
       } catch (error) {
-        console.warn(`[VideoHelper] URL 规则 ${rule.id} 执行失败：`, error);
+        warn(`URL Rule ${rule.id} Execution Failed:`, error);
         return false;
       }
     });

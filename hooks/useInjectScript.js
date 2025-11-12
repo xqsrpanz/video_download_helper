@@ -1,3 +1,4 @@
+import { log, info, err } from '../utils/log.js';
 import { useRules } from './useRules.js';
 
 let getMatchingRule = null;
@@ -11,11 +12,11 @@ async function ensureScriptsInjected(tabId, frameId = 0) {
 
   const matchedRule = getMatchingRule(tab.url);
   if (!matchedRule) {
-    console.log('no matched rule', tab.url);
+    log('No Valid Rule for URL:', tab.url);
     injectedTabTracker.delete(tabId);
     return;
   } else {
-    console.log('matched rule', tab.url, matchedRule);
+    log(`URL ${tab.url} Matched Rule:`, matchedRule);
   }
 
   const hasInjected = injectedTabTracker.get(tabId);
@@ -29,11 +30,12 @@ async function ensureScriptsInjected(tabId, frameId = 0) {
       files: matchedRule.scripts,
     });
     injectedTabTracker.set(tabId, true);
-    console.info(
-      `[VideoHelper] 已向标签 ${tabId} 注入脚本：${matchedRule.scripts.join(', ')}`
+    info(
+      `Injected Scripts to Tab ${tabId}:`,
+      matchedRule.scripts.join(', ')
     );
   } catch (error) {
-    console.error('[VideoHelper] 注入脚本失败：', error);
+    err('Failed to Inject Scripts:', error);
   }
 }
 

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Video Download Helper Starter",
-  "description": "在匹配特定网址时注入下载按钮，并触发自定义下载逻辑",
+  "name": "Video Download Helper",
+  "description": "Inject Download Button and Trigger Custom Download Logic When Matching Specific URLs",
   "version": "1.0.0",
   "action": {
     "default_title": "Video Download Helper",
