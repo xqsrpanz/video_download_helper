@@ -1,49 +1,6 @@
-import { useRules } from '../public/utils.js';
+import { useInjectScript } from '../hooks/index.js';
 
-const { getMatchingRule } = await useRules();
-
-const injectedTabTracker = new Map();
-
-async function ensureScriptsInjected(tabId, frameId = 0) {
-  const tab = await chrome.tabs.get(tabId);
-  if (!tab || !tab.url) {
-    return;
-  }
-
-  const matchedRule = getMatchingRule(tab.url);
-  if (!matchedRule) {
-    injectedTabTracker.delete(tabId);
-    return;
-  }
-
-  const hasInjected = injectedTabTracker.get(tabId);
-  if (hasInjected) {
-    return;
-  }
-
-  try {
-    await chrome.scripting.executeScript({
-      target: { tabId, frameIds: [frameId] },
-      files: matchedRule.scripts,
-    });
-    injectedTabTracker.set(tabId, true);
-    console.info(
-      `[VideoHelper] 已向标签 ${tabId} 注入脚本：${matchedRule.scripts.join(', ')}`
-    );
-  } catch (error) {
-    console.error('[VideoHelper] 注入脚本失败：', error);
-  }
-}
-
-chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
-  if (changeInfo.status === 'complete') {
-    ensureScriptsInjected(tabId).catch((error) => {
-      console.error('[VideoHelper] ensureScriptsInjected 异常：', error);
-    });
-  } else if (changeInfo.url) {
-    injectedTabTracker.delete(tabId);
-  }
-});
+useInjectScript();
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === 'VIDEO_HELPER_DOWNLOAD' && sender.tab?.id) {
