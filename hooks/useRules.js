@@ -4,11 +4,17 @@ export function buildMatcher(pattern) {
   if (!pattern) {
     return () => false;
   }
-  const escaped = pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
-  const regex = new RegExp(`^${escaped}$`);
+
+  let regex;
+  if (pattern instanceof RegExp) {
+    regex = pattern;
+  } else {
+    throw new Error('Invalid pattern: ' + pattern);
+  }
+
   return (url) => regex.test(url);
 }
-  
+
 export function compileRules(rules = []) {
   return rules.map((rule) => {
     const { pattern, scripts = ['content_scripts/injector.js'] } = rule;
