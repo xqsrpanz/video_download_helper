@@ -2,12 +2,8 @@
   const BUTTON_ID = 'video-helper-download-btn';
 
   if (document.getElementById(BUTTON_ID)) {
-    console.info('按钮已存在，跳过注入。');
+    console.info('download button already exists, skipping injection.');
     return;
-  }
-
-  if (!window?.videoDownloadHelper) {
-    window.videoDownloadHelper = {};
   }
 
   const style = document.createElement('link');
@@ -18,20 +14,15 @@
   const button = document.createElement('button');
   button.id = BUTTON_ID;
   button.type = 'button';
-  button.textContent = '下载视频';
+  button.textContent = 'Download';
 
   button.addEventListener('click', async () => {
     button.disabled = true;
     button.classList.add('video-helper__busy');
-    try {
-      await window?.videoDownloadHelper?.downloadVideo?.();
-    } catch (error) {
-      console.error('触发下载失败：', error);
-      alert(`触发下载失败：${error.message}`);
-    } finally {
-      button.disabled = false;
-      button.classList.remove('video-helper__busy');
-    }
+    console.log('post message to window');
+    window.postMessage({ type: 'VIDEO_HELPER_DOWNLOAD' }, '*');
+    button.disabled = false;
+    button.classList.remove('video-helper__busy');
   });
 
   document.body.appendChild(button);

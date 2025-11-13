@@ -27,7 +27,12 @@ async function ensureScriptsInjected(tabId, frameId = 0) {
   try {
     await chrome.scripting.executeScript({
       target: { tabId, frameIds: [frameId] },
-      files: matchedRule.scripts,
+      files: [matchedRule.scripts?.[0]],
+    });
+    await chrome.scripting.executeScript({
+      target: { tabId, frameIds: [frameId] },
+      files: matchedRule.scripts?.slice(1) ?? [],
+      world: 'MAIN',
     });
     injectedTabTracker.set(tabId, true);
     info(
