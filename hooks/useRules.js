@@ -1,5 +1,8 @@
 import { err, info, warn } from '../utils/log.js';
 import { URL_RULES_STORAGE_KEY, DEFAULT_URL_RULES } from '../config/constants.js';
+import useEnsureScriptExists from './useEnsureScriptExists.js';
+
+const ensureScriptExists = useEnsureScriptExists();
 
 export function buildMatcher(pattern) {
   if (!pattern) {
@@ -16,17 +19,39 @@ export function buildMatcher(pattern) {
   return (url) => regex.test(url);
 }
 
-export function compileRules(rules = []) {
-  return rules.map((rule) => {
-    const { pattern, scripts = ['content_scripts/injector.js'] } = rule;
-    const urlPattern = pattern ?? '';
-    const matcher = buildMatcher(urlPattern);
-    return {
-      ...rule,
-      scripts,
-      match: matcher,
-    };
-  });
+async function resolveRuleScripts(rule) {
+  if (Array.isArray(rule.scripts) && rule.scripts.length > 0) {
+    return rule.scripts;
+  }
+
+  const baseScripts = ['content_scripts/injectDownBtn.js'];
+  const candidateScript = `content_scripts/${rule.id}.js`;
+  const fallbackScript = 'content_scripts/fallBack.js';
+
+  const hasCandidateScript = await ensureScriptExists(candidateScript);
+
+  if (!hasCandidateScript) {
+    warn(`规则 ${rule.id} 未找到自定义脚本，回退至 ${fallbackScript}`);
+  }
+
+  return [...baseScripts, hasCandidateScript ? candidateScript : fallbackScript];
+}
+
+export async function compileRules(rules = []) {
+  const compiledRules = await Promise.all(
+    rules.map(async (rule) => {
+      const { pattern } = rule;
+      const urlPattern = pattern ?? '';
+      const matcher = buildMatcher(urlPattern);
+      const scripts = rules?.scripts ?? await resolveRuleScripts(rule);
+      return {
+        ...rule,
+        scripts,
+        match: matcher,
+      };
+    })
+  );
+  return compiledRules;
 }
 
 export async function loadRules() {
@@ -43,10 +68,10 @@ export async function loadRules() {
         }
       }
     }
-    return compileRules(rules);
+    return await compileRules(rules);
   } catch (error) {
     err('Failed to Load Rules:', error);
-    return compileRules(DEFAULT_URL_RULES);
+    return await compileRules(DEFAULT_URL_RULES);
   }
 }
 

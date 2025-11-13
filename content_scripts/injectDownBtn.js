@@ -2,8 +2,12 @@
   const BUTTON_ID = 'video-helper-download-btn';
 
   if (document.getElementById(BUTTON_ID)) {
-    console.debug('[VideoHelper] 按钮已存在，跳过注入。');
+    console.info('按钮已存在，跳过注入。');
     return;
+  }
+
+  if (!window?.videoDownloadHelper) {
+    window.videoDownloadHelper = {};
   }
 
   const style = document.createElement('link');
@@ -20,17 +24,9 @@
     button.disabled = true;
     button.classList.add('video-helper__busy');
     try {
-      const payload = await window.videoHelper?.prepareDownload?.();
-      const response = await chrome.runtime.sendMessage({
-        type: 'VIDEO_HELPER_DOWNLOAD',
-        payload,
-      });
-
-      if (!response?.ok) {
-        throw new Error(response?.error ?? '未知错误');
-      }
+      await window?.videoDownloadHelper?.downloadVideo?.();
     } catch (error) {
-      console.error('[VideoHelper] 触发下载失败：', error);
+      console.error('触发下载失败：', error);
       alert(`触发下载失败：${error.message}`);
     } finally {
       button.disabled = false;
@@ -39,10 +35,4 @@
   });
 
   document.body.appendChild(button);
-
-  const script = document.createElement('script');
-  script.src = chrome.runtime.getURL('content_scripts/downloader.js');
-  script.type = 'module';
-  document.documentElement.appendChild(script);
 })();
-
