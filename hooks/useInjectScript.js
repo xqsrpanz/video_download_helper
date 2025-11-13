@@ -10,18 +10,18 @@ async function ensureScriptsInjected(tabId, frameId = 0) {
     return;
   }
 
+  const hasInjected = injectedTabTracker.get(tabId);
+  if (hasInjected) {
+    return;
+  }
+
   const matchedRule = getMatchingRule(tab.url);
   if (!matchedRule) {
     log('No Valid Rule for URL:', tab.url);
     injectedTabTracker.delete(tabId);
     return;
   } else {
-    log(`URL ${tab.url} Matched Rule:`, matchedRule);
-  }
-
-  const hasInjected = injectedTabTracker.get(tabId);
-  if (hasInjected) {
-    return;
+    log('URL Matched Rule:', tab.url, matchedRule);
   }
 
   try {
@@ -48,9 +48,12 @@ export async function useInjectScript() {
   const { getMatchingRule: getMatchingRuleResult } = await useRules();
   getMatchingRule = getMatchingRuleResult;
   chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
-    if (changeInfo.status === 'complete') {
+    if (changeInfo.status === 'complete') { // 页面加载完成，需要注入
       ensureScriptsInjected(tabId);
-    } else if (changeInfo.url) {
+    }
+  });
+  chrome.webNavigation.onCommitted.addListener(({ tabId, frameId }) => {
+    if (frameId === 0) { // 页面刷新，需要重新注入
       injectedTabTracker.delete(tabId);
     }
   });

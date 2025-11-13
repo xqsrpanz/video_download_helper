@@ -1,4 +1,7 @@
 (() => {
+  if (window?.isVideoDownloadHelperInjected) return;
+  window.isVideoDownloadHelperInjected = true;
+
   window.addEventListener('message', async (event) => {
     if (event.source !== window) return;
     if (event.data.type === 'VIDEO_HELPER_DOWNLOAD') {
