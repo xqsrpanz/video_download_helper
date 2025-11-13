@@ -37,7 +37,6 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "content_scripts/downloader.js",
         "assets/styles/content.css"
       ],
       "matches": [
