@@ -34,7 +34,14 @@ export async function loadRules() {
     const stored = await chrome.storage.sync.get(URL_RULES_STORAGE_KEY);
     let rules = DEFAULT_URL_RULES;
     if (stored[URL_RULES_STORAGE_KEY]) {
-      rules = [...DEFAULT_URL_RULES, ...stored[URL_RULES_STORAGE_KEY]];
+      for (const rule of stored[URL_RULES_STORAGE_KEY]) {
+        const idx = rules.findIndex((r) => r.id === rule.id);
+        if (idx !== -1) {
+          rules[idx] = rule;
+        } else {
+          rules.push(rule);
+        }
+      }
     }
     return compileRules(rules);
   } catch (error) {
