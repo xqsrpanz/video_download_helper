@@ -24,9 +24,9 @@ async function resolveRuleScripts(rule) {
     return rule.scripts;
   }
 
-  const baseScripts = ['content_scripts/injectDownBtn.js'];
-  const candidateScript = `content_scripts/${rule.id}.js`;
-  const fallbackScript = 'content_scripts/fallBack.js';
+  const baseScripts = ['content_scripts/isolated/injectDownBtn.js'];
+  const candidateScript = `content_scripts/main/${rule.id}.js`;
+  const fallbackScript = 'content_scripts/main/fallBack.js';
 
   const hasCandidateScript = await ensureScriptExists(candidateScript);
 
