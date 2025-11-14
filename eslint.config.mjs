@@ -25,6 +25,7 @@ export default [
       quotes: ['error', 'single', { avoidEscape: true }],
       semi: ['error', 'always'],
       'no-console': 'off',
+      'no-unused-vars': 'warn',
     },
   },
 ];
