@@ -5,8 +5,8 @@
   window.addEventListener('message', async (event) => {
     if (event.source !== window) return;
     if (event.data.type === 'VIDEO_HELPER_DOWNLOAD') {
-      console.log('download resource');
       await downloadResource();
+      event.source.postMessage({ type: 'VIDEO_HELPER_DOWNLOAD_COMPLETE', downloadId: event.data.downloadId }, event.origin);
     }
   });
   // bilibili 音视频下载

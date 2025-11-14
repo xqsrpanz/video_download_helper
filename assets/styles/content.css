@@ -24,7 +24,22 @@
 }
 
 #video-helper-download-btn.video-helper__busy {
-  opacity: 0.7;
-  cursor: progress;
+  cursor: not-allowed;
+}
+
+.video-helper__spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: video-helper__spin 0.8s linear infinite;
+}
+
+@keyframes video-helper__spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
