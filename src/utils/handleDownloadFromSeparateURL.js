@@ -1,5 +1,5 @@
 import { info, err } from './log.js';
-import { getBufferFromURL, downloadBlob } from './blob.js';
+import { getBufferFromURL, downloadBlob } from './downCommon.js';
 
 export default async function handleDownloadFromSeparateURL(payload, sendResponse) {
   info('download begin, download type: SEPERATE_URL, payload:', payload);
@@ -30,4 +30,5 @@ export default async function handleDownloadFromSeparateURL(payload, sendRespons
 async function mux(videoBuffer, audioBuffer) {
   info('合并原始数据开始');
   // TODO: 合并原始数据
+  return audioBuffer; // TODO: 合并原始数据
 }

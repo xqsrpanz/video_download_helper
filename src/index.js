@@ -1,6 +1,6 @@
-import { log, err, info, warn } from '../utils/log.js';
-import { useInjectScript } from '../hooks/index.js';
-import handleDownloadFromSeparateURL from '../utils/handleDownloadFromSeparateURL.js';
+import { log, err, info, warn } from './utils/log.js';
+import { useInjectScript } from './hooks/index.js';
+import handleDownloadFromSeparateURL from './utils/handleDownloadFromSeparateURL.js';
 
 useInjectScript();
 
