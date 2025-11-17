@@ -7,8 +7,16 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
-      input: { background: 'src/index.js' },
-      output: { entryFileNames: 'background/index.js' },
+      input: {
+        background: 'src/index.js',
+        ffmpeg: 'src/offscreen/ffmpeg.js',
+      },
+      output: {
+        entryFileNames: (chunkInfo) =>
+          chunkInfo.name === 'background'
+            ? 'background/index.js'
+            : 'offscreen/[name].js',
+      },
     },
   },
 });

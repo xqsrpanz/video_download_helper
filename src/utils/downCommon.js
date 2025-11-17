@@ -27,7 +27,7 @@ async function downloadBlob(blob, name) {
     const dataURL = await blobToDataURL(blob);
     await chrome.downloads.download({
       url: dataURL,
-      filename: `${name}.mp4`,
+      filename: name,
       saveAs: true,
     });
     info('downloadBlob end, name:', name);
