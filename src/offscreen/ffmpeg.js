@@ -1,5 +1,8 @@
-import { info, err } from '../utils/log.js';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
+import useLog from '../utils/useLog.js';
+import { fetchUnit8ArrayFromURL } from '../utils/downCommon.js';
+
+const { info, err, time, timeEnd } = useLog('[Offscreen][FFmpeg]', 'red');
 
 /**
  * Offscreen document 入口脚本（仅提供“FFmpeg 服务”）：
@@ -10,7 +13,7 @@ import { FFmpeg } from '@ffmpeg/ffmpeg';
  * 建议的消息格式（从 background / popup / content 等发起）：
  * chrome.runtime.sendMessage({
  *   scope: 'FFMPEG_SERVICE',
- *   command: 'EXEC',        // 'LOAD' | 'EXEC' | 'WRITE_FILE' | 'READ_FILE' | ...
+ *   command: 'EXEC',        // 'EXEC' | 'WRITE_FILE' | 'READ_FILE' | ...
  *   payload: { ... }        // 每个 command 自己约定的参数
  * }, response => { ... });
  */
@@ -54,18 +57,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const { command, payload } = message || {};
 
       switch (command) {
-        case 'LOAD': {
-          await withFFmpeg(async () => {
-            // 仅保证实例已初始化；getFFmpegInstance 内部已做缓存
-          });
-          sendResponse({ success: true });
-          break;
-        }
-
         case 'WRITE_FILE': {
-          const { path, data } = payload || {};
-          await withFFmpeg((ffmpeg) => ffmpeg.writeFile(path, data));
+          time('WRITE_FILE', 'name:', payload?.name);
+          const { name, url, cookie } = payload || {};
+          const buffer = await fetchUnit8ArrayFromURL(url, cookie);
+          info('write file fetch source end, name:', name, 'buffer size:', buffer.byteLength / 1024 / 1024, 'MB');
+          await withFFmpeg((ffmpeg) => ffmpeg.writeFile(name, buffer));
           sendResponse({ success: true });
+          timeEnd('WRITE_FILE', 's', 'name:', name);
           break;
         }
 

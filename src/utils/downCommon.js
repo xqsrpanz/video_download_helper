@@ -1,15 +1,17 @@
-import { info, err } from './log.js';
+import useLog from './useLog.js';
+const { info, err, time, timeEnd } = useLog();
 
-async function getBufferFromURL(url, cookie) {
-  info('getBufferFromURL begin, url:', url);
+async function fetchUnit8ArrayFromURL(url, cookie) {
+  time('fetchUnit8ArrayFromURL', 'url:', url);
   const response = await fetch(url, {
     headers: {
       'Cookie': cookie,
     },
   });
   const arrayBuffer = await response.arrayBuffer();
-  info('getBufferFromURL end, url:', url, 'size:', arrayBuffer.byteLength / 1024 / 1024, 'MB');
-  return arrayBuffer;
+  const unit8Array = new Uint8Array(arrayBuffer);
+  timeEnd('fetchUnit8ArrayFromURL', 's', 'url:', url, 'size:', unit8Array.byteLength / 1024 / 1024, 'MB');
+  return unit8Array;
 }
 
 async function blobToDataURL(blob) {
@@ -38,7 +40,7 @@ async function downloadBlob(blob, name) {
 }
 
 export {
-  getBufferFromURL,
+  fetchUnit8ArrayFromURL,
   blobToDataURL,
   downloadBlob,
 };

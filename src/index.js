@@ -1,6 +1,8 @@
-import { log, err, info, warn } from './utils/log.js';
+import useLog from './utils/useLog.js';
 import { useInjectScript } from './hooks/index.js';
 import handleDownloadFromSeparateURL from './utils/handleDownloadFromSeparateURL.js';
+
+const { info } = useLog();
 
 useInjectScript();
 

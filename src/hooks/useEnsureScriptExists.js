@@ -1,4 +1,5 @@
-import { warn } from '../utils/log.js';
+import useLog from '../utils/useLog.js';
+const { warn } = useLog();
 
 export default function useEnsureScriptExists() {
   const scriptExistenceCache = new Map();

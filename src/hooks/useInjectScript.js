@@ -1,5 +1,7 @@
-import { log, info, err } from '../utils/log.js';
+import useLog from '../utils/useLog.js';
 import { useRules } from './useRules.js';
+
+const { log, info, err } = useLog();
 
 let getMatchingRule = null;
 

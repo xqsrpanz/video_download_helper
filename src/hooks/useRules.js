@@ -1,6 +1,8 @@
-import { err, info, warn } from '../utils/log.js';
+import useLog from '../utils/useLog.js';
 import { URL_RULES_STORAGE_KEY, DEFAULT_URL_RULES } from '../config/constants.js';
 import useEnsureScriptExists from './useEnsureScriptExists.js';
+
+const { err, info, warn } = useLog();
 
 const ensureScriptExists = useEnsureScriptExists();
 
