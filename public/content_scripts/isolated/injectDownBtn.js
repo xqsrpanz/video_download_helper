@@ -163,6 +163,7 @@
         await handleFFmpegDown(payload, fileHandle, fileName);
       }
 
+      alert(`${fileName} 下载完成`);
     } catch (error) {
       alert(error.message);
     } finally {
