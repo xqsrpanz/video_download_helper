@@ -1,6 +1,6 @@
 import { LOG_PREFIX } from '../config/constants.js';
 
-export default function useLog (namespace = LOG_PREFIX, prefixColor = '#2f94fa', timerColor = '#2f94fa') {
+export default function useLog (namespace = LOG_PREFIX, prefixColor = '#2f94fa', timerColor = 'red') {
   const color = `color: ${prefixColor};`;
   const timerC = `color: ${timerColor};`;
 
@@ -33,6 +33,8 @@ export default function useLog (namespace = LOG_PREFIX, prefixColor = '#2f94fa',
         duration = duration / 6000;
       }
       console.log(`%c${namespace}%c${label}`, color, timerC, `end, cost: ${duration} ${unit}`, ...contents);
+      timeMap.delete(label);
+      return duration;
     }
   }
   return {

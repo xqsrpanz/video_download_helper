@@ -1,8 +1,9 @@
 import useLog from './useLog.js';
-const { info, err, time, timeEnd } = useLog();
+
+const { time, timeEnd } = useLog('[DownCommon]', 'blue');
 
 async function fetchUnit8ArrayFromURL(url, cookie) {
-  time('fetchUnit8ArrayFromURL', 'url:', url);
+  time(`fetchUnit8ArrayFromURL ${url}`);
   const response = await fetch(url, {
     headers: {
       'Cookie': cookie,
@@ -10,7 +11,7 @@ async function fetchUnit8ArrayFromURL(url, cookie) {
   });
   const arrayBuffer = await response.arrayBuffer();
   const unit8Array = new Uint8Array(arrayBuffer);
-  timeEnd('fetchUnit8ArrayFromURL', 's', 'url:', url, 'size:', unit8Array.byteLength / 1024 / 1024, 'MB');
+  timeEnd(`fetchUnit8ArrayFromURL ${url}`, 's', 'size:', unit8Array.byteLength / 1024 / 1024, 'MB');
   return unit8Array;
 }
 
@@ -23,24 +24,7 @@ async function blobToDataURL(blob) {
   });
 }
 
-async function downloadBlob(blob, name) {
-  info('downloadBlob begin, name:', name);
-  try {
-    const dataURL = await blobToDataURL(blob);
-    await chrome.downloads.download({
-      url: dataURL,
-      filename: name,
-      saveAs: true,
-    });
-    info('downloadBlob end, name:', name);
-  } catch (error) {
-    err('downloadBlob error, name:', name, 'error:', error);
-    throw error;
-  }
-}
-
 export {
   fetchUnit8ArrayFromURL,
   blobToDataURL,
-  downloadBlob,
 };

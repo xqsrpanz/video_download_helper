@@ -8,8 +8,8 @@ useInjectScript();
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === 'SEPERATE_URL' && message?.payload) {
-    handleDownloadFromSeparateURL(message.payload, sendResponse);
-    return true; // 保持消息通道开放以支持异步响应
+    handleDownloadFromSeparateURL(message.payload, sendResponse, sender.tab?.id);
+    return true;
   }
   return false;
 });

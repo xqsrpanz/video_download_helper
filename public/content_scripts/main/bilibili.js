@@ -1,6 +1,13 @@
 (() => {
+  // 是否注入
   if (window?.isVideoDownloadHelperInjected) return;
   window.isVideoDownloadHelperInjected = true;
+
+  // 函数声明
+  // log
+  function log(...message) {
+    console.log('[BILIBILI]', ...message);
+  }
 
   window.addEventListener('message', async (event) => {
     if (event.source !== window) return;
@@ -16,11 +23,13 @@
         const name = document.querySelector('#viewbox_report > div.video-info-title > div > h1')?.textContent || 'bilibili_video';
         const cookie = document.cookie;
         const downloadId = event.data.downloadId;
+        log('[VARS]', { videoURL, audioURL, name, cookie, downloadId });
         window.postMessage({
-          type: 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO_RESPONSE',
+          type: 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO_RES',
           downloadId,
           payload: {
             type: 'SEPERATE_URL',
+            downloadId,
             videoURL,
             audioURL,
             name: name.trim(),
@@ -30,11 +39,11 @@
         }, window.location.origin);
       } catch (error) {
         console.error('获取下载信息失败:', error);
-        event.source.postMessage({ 
-          type: 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO_ERROR', 
+        window.postMessage({ 
+          type: 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO_ERR', 
           downloadId: event.data.downloadId,
           error: error.message
-        }, event.origin);
+        }, window.location.origin);
       }
     }
   });
