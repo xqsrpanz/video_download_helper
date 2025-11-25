@@ -62,8 +62,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       switch (command) {
         case 'WRITE_FILE': {
           time(`WRITE_FILE ${payload?.name}`);
-          const { name, url, cookie } = payload || {};
-          const buffer = await fetchUnit8ArrayFromURL(url, cookie);
+          const { name, url, headers } = payload || {};
+          const buffer = await fetchUnit8ArrayFromURL(url, headers);
           info('write file fetch source end, name:', name, 'buffer size:', buffer.byteLength / 1024 / 1024, 'MB');
           await withFFmpeg((ffmpeg) => ffmpeg.writeFile(name, buffer));
           sendResponse({ success: true });

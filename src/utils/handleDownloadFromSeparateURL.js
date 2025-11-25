@@ -7,7 +7,7 @@ const { info, err } = useLog();
 export default async function handleDownloadFromSeparateURL(payload, sendResponse, tabId) {
   info('download begin, download type: SEPERATE_URL, payload:', payload);
   try {
-    const { videoURL, audioURL, name, cookie, downloadId } = payload;
+    const { videoURL, audioURL, name, headers, downloadId } = payload;
     if (!videoURL || !audioURL) {
       throw new Error('视频或音频 URL 缺失');
     }
@@ -21,13 +21,13 @@ export default async function handleDownloadFromSeparateURL(payload, sendRespons
     const videoPromise = rpc({ scope: 'FFMPEG_SERVICE', command: 'WRITE_FILE', payload: {
       name: `${downloadId}_video.m4s`,
       url: videoURL,
-      cookie,
+      headers,
     }});
 
     const audioPromise = rpc({ scope: 'FFMPEG_SERVICE', command: 'WRITE_FILE', payload: {
       name: `${downloadId}_audio.m4s`,
       url: audioURL,
-      cookie,
+      headers,
     }});
 
     await Promise.all([videoPromise, audioPromise]);
