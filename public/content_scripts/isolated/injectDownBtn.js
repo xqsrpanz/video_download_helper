@@ -166,6 +166,11 @@
         await handleFFmpegDown(payload, fileHandle, fileName);
       }
 
+      if (payload.type === 'FROM_URL_TEMPLATE') {
+        log('[FROM_URL_TEMPLATE]', payload);
+        // TODO: 处理模板链接下载
+      }
+
       notify({ message: `${fileName} 下载完成` });
     } catch (error) {
       notify({ message: `下载失败: ${error.message}` });
