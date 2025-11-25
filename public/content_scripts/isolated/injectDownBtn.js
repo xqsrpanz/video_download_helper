@@ -66,7 +66,6 @@
     let fileName = null;
     let downloadInfo = null;
 
-    // 立即在用户手势上下文中弹出文件选择器
     try {
       downloadInfo = await rpcToMainProcess({ type: 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO', downloadId, from: 'isolated' });
       fileHandle = await window.showSaveFilePicker({
@@ -140,6 +139,10 @@
       throw error;
     }
   }
+  // 系统通知
+  function notify(payload) {
+    rpc({ type: 'SYSTEM_NOTIFY', payload });
+  }
   // 下载最终回调
   const downloadFinalCallback = () => {
     button.disabled = false;
@@ -163,9 +166,9 @@
         await handleFFmpegDown(payload, fileHandle, fileName);
       }
 
-      alert(`${fileName} 下载完成`);
+      notify({ message: `${fileName} 下载完成` });
     } catch (error) {
-      alert(error.message);
+      notify({ message: `下载失败: ${error.message}` });
     } finally {
       downloadFinalCallback();
     }

@@ -17,7 +17,8 @@
     "downloads",
     "storage",
     "webNavigation",
-    "offscreen"
+    "offscreen",
+    "notifications"
   ],
   "host_permissions": [
     "<all_urls>"
