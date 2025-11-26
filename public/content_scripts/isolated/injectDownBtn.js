@@ -18,7 +18,7 @@
   const buttonText = 'Download';
   button.textContent = buttonText;
 
-  // 函数声明
+  // 通用函数声明
   // log
   function log(...message) {
     console.log('[injectDownBtn]', ...message);
@@ -60,6 +60,16 @@
       window.postMessage(message, window.location.origin);
     });
   }
+  // 系统通知
+  function notify(payload) {
+    rpc({ type: 'SYSTEM_NOTIFY', payload });
+  }
+  // 下载最终回调
+  const downloadFinalCallback = () => {
+    button.disabled = false;
+    button.classList.remove('video-helper__busy');
+    button.textContent = buttonText;
+  };
   // 获取下载信息
   async function getDownloadInfo(downloadId) {
     let fileHandle = null;
@@ -88,7 +98,36 @@
     if (!fileHandle || !fileName || !downloadInfo) throw new Error('getDownloadInfo unknown error');
     return { fileHandle, fileName, downloadInfo };
   }
-  // 从ffmpeg的处理结果分块下载
+  // 获取块并写入句柄 TODO: 并发下载
+  async function getChunksAndWriteToHandle(fileHandle, startIdx, reqFunc, isEnd) {
+    const MAX_RETRY_COUNT = 3;
+    const writable = await fileHandle.createWritable();
+    let index = startIdx;
+    while (true) {
+      let retryCount = 0;
+      let res = null, err = null;
+      while (retryCount < MAX_RETRY_COUNT) {
+        try {
+          res = await reqFunc(index);
+          break;
+        } catch (error) {
+          retryCount++;
+          err = error;
+        }
+      }
+      if (!res && err) throw err;
+
+      if (isEnd(index, res)) {
+        break;
+      }
+      await writable.write(res);
+      index++;
+    }
+    await writable.close();
+  }
+
+  // 特殊函数声明
+  // 从ffmpeg的处理结果分块下载 // TODO: 将写入磁盘部分使用getChunksAndWriteToHandle处理
   async function handleFFmpegDown({ ffmpegFileName }, savedFileHandle, savedFileName) {
     // 获取文件信息
     const { fileSize, chunkSize, totalChunks } = await rpc({
@@ -139,16 +178,45 @@
       throw error;
     }
   }
-  // 系统通知
-  function notify(payload) {
-    rpc({ type: 'SYSTEM_NOTIFY', payload });
+  // 从模板链接获取请求函数
+  function useRequestFunc(source, template) {
+    log('[useRequestFunc]', source, template);
+    const { url: rawUrl, method, headers, body } = template;
+    const err = (msg = `useRequestFunc error: unknown source ${source}`) => { throw new Error(msg); };
+    const reqFunc = async (index) => {
+      let url = rawUrl;
+      if (source === 'pornhub') {
+        url = rawUrl.replace(/seg-\d+(-[^/?#]*\.ts)/, `seg-${index}$1`);
+        const res = await fetch(url, { method, headers, body });
+        if (res.status !== 200) {
+          if (res.status == 472) {
+            err('Received status 472: Rate limit exceeded. Consider adding delays between requests.');
+            return '472';
+          }
+          if (res.status == 404) {
+            return 'EOF';
+          }
+          err(`Unexpected error in reqFunc, source: ${source}, status code: ${res.status}`);
+        }
+        const blob = await res.arrayBuffer();
+        return new Uint8Array(blob);
+      }
+      err();
+    };
+    const getStartIdx = () => {
+      if (source === 'pornhub') {
+        return 1;
+      }
+      err();
+    };
+    const isEnd = (index, res) => {
+      if (source === 'pornhub') {
+        return res === '472' || res === 'EOF';
+      }
+      err();
+    };
+    return { reqFunc, getStartIdx, isEnd };
   }
-  // 下载最终回调
-  const downloadFinalCallback = () => {
-    button.disabled = false;
-    button.classList.remove('video-helper__busy');
-    button.textContent = buttonText;
-  };
 
   button.addEventListener('click', async () => {
     try {
@@ -166,9 +234,10 @@
         await handleFFmpegDown(payload, fileHandle, fileName);
       }
 
-      if (payload.type === 'FROM_URL_TEMPLATE') {
-        log('[FROM_URL_TEMPLATE]', payload);
-        // TODO: 处理模板链接下载
+      if (payload.type === 'FROM_REQUEST_TEMPLATE') {
+        log('[FROM_REQUEST_TEMPLATE]', payload);
+        const { reqFunc, getStartIdx, isEnd } = useRequestFunc(payload?.source, payload?.template);
+        await getChunksAndWriteToHandle(fileHandle, getStartIdx(), reqFunc, isEnd);
       }
 
       notify({ message: `${fileName} 下载完成` });

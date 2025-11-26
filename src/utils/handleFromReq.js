@@ -13,8 +13,13 @@ export default function handleFromReq(payload, sendResponse, tabId) {
           message: '找到模板链接，开始下载...',
           payload: {
             ...payload,
-            type: 'FROM_URL_TEMPLATE',
-            templateUrl: details.url,
+            type: 'FROM_REQUEST_TEMPLATE',
+            template: {
+              url: details.url,
+              method: details.method,
+              headers: details.headers,
+              body: details.body,
+            }
           }
         });
         chrome.webRequest.onBeforeRequest.removeListener(listener);
