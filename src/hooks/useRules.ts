@@ -1,12 +1,12 @@
-import useLog from '../utils/useLog.js';
-import { URL_RULES_STORAGE_KEY, DEFAULT_URL_RULES } from '../config/constants.js';
-import useEnsureScriptExists from './useEnsureScriptExists.js';
+import { useLog } from './useLog';
+import { useEnsureScriptExists } from './useEnsureScriptExists.js';
+import { URL_RULES_STORAGE_KEY, DEFAULT_URL_RULES, type RULE } from '@/config/constants';
 
 const { err, info, warn } = useLog();
 
 const ensureScriptExists = useEnsureScriptExists();
 
-export function buildMatcher(pattern) {
+export function buildMatcher(pattern: RegExp) {
   if (!pattern) {
     return () => false;
   }
@@ -18,10 +18,10 @@ export function buildMatcher(pattern) {
     throw new Error('Invalid pattern: ' + pattern);
   }
 
-  return (url) => regex.test(url);
+  return (url: string) => regex.test(url);
 }
 
-async function resolveRuleScripts(rule) {
+async function resolveRuleScripts(rule: RULE) {
   if (Array.isArray(rule.scripts) && rule.scripts.length > 0) {
     return rule.scripts;
   }
@@ -39,13 +39,13 @@ async function resolveRuleScripts(rule) {
   return [...baseScripts, hasCandidateScript ? candidateScript : fallbackScript];
 }
 
-export async function compileRules(rules = []) {
+export async function compileRules(rules: RULE[] = []) {
   const compiledRules = await Promise.all(
     rules.map(async (rule) => {
       const { pattern } = rule;
       const urlPattern = pattern ?? '';
       const matcher = buildMatcher(urlPattern);
-      const scripts = rules?.scripts ?? await resolveRuleScripts(rule);
+      const scripts = rule?.scripts ?? await resolveRuleScripts(rule);
       return {
         ...rule,
         scripts,
@@ -55,6 +55,7 @@ export async function compileRules(rules = []) {
   );
   return compiledRules;
 }
+export type CompiledRule = Awaited<ReturnType<typeof compileRules>>[number];
 
 export async function loadRules() {
   try {
@@ -77,7 +78,9 @@ export async function loadRules() {
   }
 }
 
-export async function useRules() {
+export type GetMatchingRule = (url: string) => CompiledRule | false;
+
+export async function useRules(): Promise<{ rules: CompiledRule[], getMatchingRule: GetMatchingRule }> {
   let rules = await loadRules();
   chrome.storage.onChanged.addListener(async (changes, areaName) => {
     if (areaName === 'sync' && changes[URL_RULES_STORAGE_KEY]) {
@@ -85,7 +88,7 @@ export async function useRules() {
       info('URL Rules Configuration Updated.');
     }
   });
-  const getMatchingRule = (url) => {
+  const getMatchingRule: GetMatchingRule = (url: string) => {
     return rules.find((rule) => {
       try {
         return rule.match(url);
@@ -93,7 +96,7 @@ export async function useRules() {
         warn(`URL Rule ${rule.id} Execution Failed:`, error);
         return false;
       }
-    });
+    }) ?? false;
   };
   return { rules, getMatchingRule };
 }

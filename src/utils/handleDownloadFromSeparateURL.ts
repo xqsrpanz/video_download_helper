@@ -1,10 +1,9 @@
-import useLog from './useLog.js';
-import rpc from './rpc.js';
-import { ensureFFmpegLoaded } from '../hooks/useOffscreenDocument.js';
+import { rpc } from './rpc';
+import { useLog, ensureFFmpegLoaded } from '@/hooks';
 
-const { info, err } = useLog();
+const { info, err } = useLog('[handleDownloadFromSeparateURL]');
 
-export default async function handleDownloadFromSeparateURL(payload, sendResponse, tabId) {
+export async function handleDownloadFromSeparateURL(payload: any, sendResponse: (response: any) => void, tabId: number) {
   info('download begin, download type: SEPERATE_URL, payload:', payload);
   try {
     const { videoURL, audioURL, name, headers, downloadId } = payload;
@@ -41,8 +40,8 @@ export default async function handleDownloadFromSeparateURL(payload, sendRespons
       fileName: name,
       ffmpegFileName: `${downloadId}.mp4`,
     } });
-  } catch (error) {
+  } catch (error: any) {
     err('下载任务失败:', error);
-    sendResponse({ success: false, error: error.message });
+    sendResponse({ success: false, error: error?.message });
   }
 }

@@ -1,9 +1,9 @@
-import useLog from '../utils/useLog.js';
-const { warn } = useLog();
+import { useLog } from './useLog';
+const { warn } = useLog('[useEnsureScriptExists]');
 
-export default function useEnsureScriptExists() {
+export function useEnsureScriptExists() {
   const scriptExistenceCache = new Map();
-  return async (scriptPath) => {
+  return async (scriptPath: string) => {
     if (scriptExistenceCache.has(scriptPath)) {
       return scriptExistenceCache.get(scriptPath);
     }

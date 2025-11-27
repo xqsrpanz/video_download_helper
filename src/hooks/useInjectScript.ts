@@ -1,12 +1,13 @@
-import useLog from '../utils/useLog.js';
-import { useRules } from './useRules.js';
+import { useLog } from './useLog';
+import { useRules } from './useRules';
+import type { GetMatchingRule } from './useRules';
 
-const { log, info, err } = useLog();
+const { log, info, err } = useLog('[useInjectScript]');
 
-let getMatchingRule = null;
+let getMatchingRule: GetMatchingRule | null = null;
 
 const injectedTabTracker = new Map();
-async function ensureScriptsInjected(tabId, frameId = 0) {
+async function ensureScriptsInjected(tabId: number, frameId = 0) {
   const tab = await chrome.tabs.get(tabId);
   if (!tab || !tab.url) {
     return;
@@ -17,7 +18,7 @@ async function ensureScriptsInjected(tabId, frameId = 0) {
     return;
   }
 
-  const matchedRule = getMatchingRule(tab.url);
+  const matchedRule = getMatchingRule?.(tab.url);
   if (!matchedRule) {
     log('No Valid Rule for URL:', tab.url);
     injectedTabTracker.delete(tabId);

@@ -1,16 +1,13 @@
-/**
- * @typedef {Object} UseOffscreenDocumentParams
- * @property {string} path - Offscreen document 的相对路径，例如 "offscreen/index.html"
- * @property {string[]} [reasons] - 创建 offscreen document 的理由列表，见 Chrome offscreen API
- * @property {string} [justification] - 创建的理由描述
- */
-/**
- * @param {UseOffscreenDocumentParams} params - 用于创建 offscreen document 的参数
- */
+type Reason = NonNullable<chrome.offscreen.CreateParameters['reasons']>[number];
 
-function useOffscreenDocument(params) {
-  /** @type {Promise<void> | undefined} */
-  let createpromise;
+interface UseOffscreenDocumentParams {
+  path: string;
+  reasons?: Reason[];
+  justification?: string;
+}
+
+function useOffscreenDocument(params: UseOffscreenDocumentParams) {
+  let createpromise: Promise<void> | null = null;
   const offscreenUrl = chrome.runtime.getURL(params.path);
   const createParams = {
     url: offscreenUrl,

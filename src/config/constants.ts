@@ -1,5 +1,12 @@
+export type RULE = {
+  id: string;
+  description: string;
+  pattern: RegExp;
+  scripts?: string[];
+}
+
 export const URL_RULES_STORAGE_KEY = 'VideoDownloadHelper:URLRules';
-export const DEFAULT_URL_RULES = [
+export const DEFAULT_URL_RULES: RULE[] = [
   {
     id: 'bilibili',
     description: '匹配 bilibili.com 的所有视频页面',

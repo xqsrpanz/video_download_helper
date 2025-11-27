@@ -1,28 +1,28 @@
-import { LOG_PREFIX } from '../config/constants.js';
+import { LOG_PREFIX } from '@/config/constants';
 
-export default function useLog (namespace = LOG_PREFIX, prefixColor = '#2f94fa', timerColor = 'red') {
+export function useLog (namespace = LOG_PREFIX, prefixColor = '#2f94fa', timerColor = 'red') {
   const color = `color: ${prefixColor};`;
   const timerC = `color: ${timerColor};`;
 
-  function log (...contents) {
+  function log (...contents: any[]) {
     console.log(`%c${namespace}`, color, ...contents);
   }
-  function err (...contents) {
+  function err (...contents: any[]) {
     console.error(`%c${namespace}`, color, ...contents);
   }
-  function info (...contents) {
+  function info (...contents: any[]) {
     console.info(`%c${namespace}`, color, ...contents);
   }
-  function warn (...contents) {
+  function warn (...contents: any[]) {
     console.warn(`%c${namespace}`, color, ...contents);
   }
 
   const timeMap = new Map();
-  function time (label, ...contents) {
+  function time (label: string, ...contents: any[]) {
     timeMap.set(label, Date.now());
     console.log(`%c${namespace}%c${label}`, color, timerC, 'start', ...contents);
   }
-  function timeEnd (label, unit = 'ms', ...contents) {
+  function timeEnd (label: string, unit = 'ms', ...contents: any[]) {
     const startTime = timeMap.get(label);
     if (startTime) {
       const endTime = Date.now();

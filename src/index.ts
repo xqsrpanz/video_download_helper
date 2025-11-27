@@ -1,7 +1,6 @@
-import useLog from './utils/useLog.js';
-import { useInjectScript } from './hooks/index.js';
-import handleDownloadFromSeparateURL from './utils/handleDownloadFromSeparateURL.js';
-import handleFromReq from './utils/handleFromReq.js';
+import { useLog } from '@/hooks';
+import { useInjectScript } from './hooks';
+import { handleDownloadFromSeparateURL, handleFromReq } from '@/utils';
 
 const { info } = useLog();
 
@@ -9,11 +8,11 @@ useInjectScript();
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === 'SEPERATE_URL' && message?.payload) {
-    handleDownloadFromSeparateURL(message.payload, sendResponse, sender.tab?.id);
+    handleDownloadFromSeparateURL(message.payload, sendResponse, sender.tab?.id as number);
     return true;
   }
   if (message?.type === 'FROM_REQ' && message?.payload) {
-    handleFromReq(message.payload, sendResponse, sender.tab?.id);
+    handleFromReq(message.payload, sendResponse, sender.tab?.id as number);
     return true;
   }
   if (message?.type === 'SYSTEM_NOTIFY' && message?.payload) {

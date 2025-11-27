@@ -1,6 +1,6 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
-import useLog from '../utils/useLog.js';
-import { fetchUnit8ArrayFromURL } from '../utils/downCommon.js';
+import { useLog } from '@/hooks';
+import { fetchUnit8ArrayFromURL } from '@/utils';
 
 const { info, err, time, timeEnd } = useLog('[Offscreen][FFmpeg]', 'red');
 
@@ -18,8 +18,8 @@ const { info, err, time, timeEnd } = useLog('[Offscreen][FFmpeg]', 'red');
  * }, response => { ... });
  */
 
-let ffmpegInstance = null;
-let ffmpegLoadingPromise = null;
+let ffmpegInstance: FFmpeg | null = null;
+let ffmpegLoadingPromise: Promise<FFmpeg> | null = null;
 
 // 文件数据缓存，用于优化分块读取性能
 const fileCache = new Map();
@@ -45,7 +45,7 @@ async function getFFmpegInstance() {
 }
 
 
-async function withFFmpeg(fn) {
+async function withFFmpeg(fn: (ffmpeg: FFmpeg) => Promise<any>) {
   const ffmpeg = await getFFmpegInstance();
   return fn(ffmpeg);
 }
@@ -123,7 +123,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           const base64 = await new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onloadend = () => {
-              const result = reader.result;
+              const result = reader.result as string;
               const base64Data = result.split(',')[1];
               resolve(base64Data);
             };
@@ -157,7 +157,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           });
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       err('[Offscreen][FFMPEG_SERVICE] Error while handling command:', error);
       sendResponse({
         success: false,
