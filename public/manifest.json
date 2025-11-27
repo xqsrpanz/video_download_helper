@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "action": {
     "default_title": "Video Download Helper",
-    "default_popup": "popup/popup.html",
+    "default_popup": "popup/index.html",
     "default_icon": {
       "16": "assets/icons/video_download_helper_icon_16.png",
       "32": "assets/icons/video_download_helper_icon_32.png"
@@ -31,7 +31,7 @@
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
   },
-  "options_page": "options/options.html",
+  "options_page": "options/index.html",
   "icons": {
     "16": "assets/icons/video_download_helper_icon_16.png",
     "32": "assets/icons/video_download_helper_icon_32.png",

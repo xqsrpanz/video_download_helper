@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "jsx": "preserve",
+    "resolveJsonModule": true,
+    "types": ["chrome"],
+    "esModuleInterop": true
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.vue",
+    "src",
+    "popup",
+    "options",
+    "types"
+  ]
+}
