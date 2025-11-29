@@ -65,7 +65,7 @@ export async function loadRules() {
       for (const rule of stored[URL_RULES_STORAGE_KEY]) {
         const idx = rules.findIndex((r) => r.id === rule.id);
         if (idx !== -1) {
-          rules[idx] = rule;
+          Object.assign(rules[idx], rule);
         } else {
           rules.push(rule);
         }

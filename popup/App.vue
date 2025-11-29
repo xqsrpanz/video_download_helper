@@ -1,10 +1,15 @@
 <template>
-  <div class="popup-container">这是 Popup Vue 页面！ {{ count }}</div>
+  <div class="popup-container">
+    <component :is="currentComponent" />
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-const count = ref(0)
+import useMatchRule from './useMatchRule'
+import useGetComponent from './useGetComponent'
+
+const { currentRule } = useMatchRule()
+const currentComponent = useGetComponent(() => currentRule.value?.id)
 </script>
 
 <style scoped>
