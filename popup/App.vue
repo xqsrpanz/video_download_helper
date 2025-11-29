@@ -9,8 +9,10 @@ const count = ref(0)
 
 <style scoped>
 .popup-container {
-  width: 200px;
-  height: 300px;
+  width: fit-content;
+  height: fit-content;
+  white-space: nowrap;
+  padding: 16px;
   background-color: #fff;
 }
 </style>
