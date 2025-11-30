@@ -17,9 +17,11 @@ import { Button } from '@king-design/vue'
 import useMatchRule from './useMatchRule'
 import useGetComponent from './useGetComponent'
 import { rpcToMainProcess, notify } from '@/utils'
+import { useStore } from '@/hooks'
 
 const { currentRule } = useMatchRule()
 const currentComponent = useGetComponent(() => currentRule.value?.id)
+const { addDownloadInfo } = useStore()
 
 const loading = ref(false)
 
@@ -40,7 +42,8 @@ async function getDownloadInfo() {
 async function handleDownload() {
   const downloadInfo: any = await getDownloadInfo()
   if (!downloadInfo) return
-  // TODO: set store
+  addDownloadInfo(downloadInfo)
+  chrome.runtime.openOptionsPage()
 }
 
 const btnText = computed(() => {

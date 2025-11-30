@@ -3,3 +3,4 @@ export * from './useInjectScript';
 export * from './useEnsureScriptExists';
 export * from './useOffscreenDocument';
 export * from './useLog';
+export * from './useStore';
