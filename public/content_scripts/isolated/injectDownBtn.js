@@ -15,7 +15,7 @@
   const button = document.createElement('button');
   button.id = BUTTON_ID;
   button.type = 'button';
-  const buttonText = 'Download';
+  const buttonText = '立即下载';
   button.textContent = buttonText;
 
   // 通用函数声明
@@ -25,13 +25,13 @@
   }
   // RPC
   async function rpc(message) {
-    log('[RPC][BACKGROUND][SEND]', message);
+    log('[RPC][TO_BACKGROUND]', message);
     return new Promise((resolve, reject) => {
       chrome.runtime.sendMessage(message, (response) => {
         if (response?.error) {
           reject(new Error(response.error));
         } else {
-          log('[RPC][BACKGROUND][RECEIVE]', response);
+          log('[RPC][FROM_BACKGROUND]', response);
           resolve(response);
         }
       });
@@ -39,19 +39,19 @@
   }
   // RPC to Main Process
   async function rpcToMainProcess(message) {
-    log('[RPC][MAIN][SEND]', message);
+    !message?.from && (message = { ...message, from: 'isolated' });
+    log('[RPC][TO_MAIN]', message);
     return new Promise((resolve, reject) => {
       const listener = (event) => {
         if (event.source !== window) return;
-        const sendType = message.type;
-        const allowTypes = [`${sendType}_RES`, `${sendType}_ERR`];
-        if (allowTypes.includes(event.data.type) && event.data.downloadId === message.downloadId) {
+        const allowFroms = ['main'];
+        if (allowFroms.includes(event.data.from) && event.data.downloadId === message.downloadId) {
           // 立即移除监听器，防止重复触发
           window.removeEventListener('message', listener);
           if (event.data?.error) {
             reject(new Error(event.data.error));
           } else {
-            log('[RPC][MAIN][RECEIVE]', event.data);
+            log('[RPC][FROM_MAIN]', event.data);
             resolve(event.data);
           }
         }
@@ -77,7 +77,8 @@
     let downloadInfo = null;
 
     try {
-      downloadInfo = await rpcToMainProcess({ type: 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO', downloadId, from: 'isolated' });
+      downloadInfo = await rpcToMainProcess({ type: 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO', downloadId });
+      log('[getDownloadInfo]', downloadInfo);
       fileHandle = await window.showSaveFilePicker({
         suggestedName: downloadInfo.payload.name,
         types: [{
@@ -124,6 +125,15 @@
       index++;
     }
     await writable.close();
+  }
+  // 获取当前页面tabId
+  let currentTabId = null;
+  async function getCurrentTabId() {
+    if (currentTabId) return currentTabId;
+    const { tabId } = await rpc({ type: 'GET_CURRENT_TAB_ID' });
+    if (!tabId) throw new Error('获取当前页面tabId失败');
+    currentTabId = tabId;
+    return currentTabId;
   }
 
   // 特殊函数声明
@@ -246,6 +256,22 @@
     } finally {
       downloadFinalCallback();
     }
+  });
+
+  // popup -> background -> main
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    getCurrentTabId().then((tabId) => {
+      if (message.type === 'TO_MAIN_PROCESS' && message.tabId === tabId) {
+        rpcToMainProcess(message?.payload).then((res) => {
+          sendResponse(res);
+        }).catch((error) => {
+          sendResponse({ error: error?.message || '转发消息失败' });
+        });
+      }
+    }).catch((error) => {
+      sendResponse({ error: error?.message || '获取当前页面tabId失败' });
+    });
+    return true;
   });
 
   document.body.appendChild(button);

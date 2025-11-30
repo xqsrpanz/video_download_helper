@@ -7,6 +7,19 @@ const { info } = useLog();
 useInjectScript();
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === 'TO_MAIN_PROCESS' && message?.tabId && message?.payload) {
+    // popup -> background -> main
+    chrome.tabs.sendMessage(message.tabId, message).then((response) => {
+      sendResponse(response);
+    }).catch((error) => {
+      sendResponse({ error: error?.message || '转发消息失败' });
+    });
+    return true;
+  }
+  if (message?.type === 'GET_CURRENT_TAB_ID') {
+    sendResponse({ tabId: sender.tab?.id });
+    return true;
+  }
   if (message?.type === 'SEPERATE_URL' && message?.payload) {
     handleDownloadFromSeparateURL(message.payload, sendResponse, sender.tab?.id as number);
     return true;

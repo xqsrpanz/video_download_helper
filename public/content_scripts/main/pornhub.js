@@ -11,14 +11,16 @@
 
   window.addEventListener('message', async (event) => {
     if (event.source !== window) return;
-    if (event.data.type === 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO') {
+    const allowFroms = ['popup', 'isolated'];
+    if (allowFroms.includes(event.data.from) && event.data.type === 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO') {
       try {
         const downloadId = event.data.downloadId;
-        const name = document.querySelector('#videoTitle > span')?.textContent ?? 'pornhub_video';
+        const name = document.querySelector('div.title-container > h1 > span')?.textContent ?? 'pornhub_video';
 
         window.postMessage({
-          type: 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO_RES',
+          type: 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO',
           downloadId,
+          from: 'main',
           payload: {
             type: 'FROM_REQ',
             downloadId,
@@ -29,8 +31,9 @@
       } catch (error) {
         console.error('获取下载信息失败:', error);
         window.postMessage({ 
-          type: 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO_ERR', 
+          type: 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO', 
           downloadId: event.data.downloadId,
+          from: 'main',
           error: error.message
         }, window.location.origin);
       }

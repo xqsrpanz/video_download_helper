@@ -1,5 +1,5 @@
 <template>
-  <div>Pornhub</div>
+  <div>当前页面是Pornhub视频页面</div>
 </template>
 
 <script setup lang="ts">

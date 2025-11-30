@@ -23,7 +23,8 @@
 
   window.addEventListener('message', async (event) => {
     if (event.source !== window) return;
-    if (event.data.type === 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO') {
+    const allowFroms = ['popup', 'isolated'];
+    if (allowFroms.includes(event.data.from) && event.data.type === 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO') {
       try {
         const __playinfo__ = window.__playinfo__;
         if (!__playinfo__?.data?.dash) {
@@ -52,8 +53,9 @@
         }
 
         window.postMessage({
-          type: 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO_RES',
+          type: 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO',
           downloadId,
+          from: 'main',
           payload: {
             type: 'SEPERATE_URL',
             downloadId,
@@ -67,8 +69,9 @@
       } catch (error) {
         console.error('获取下载信息失败:', error);
         window.postMessage({ 
-          type: 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO_ERR', 
+          type: 'VIDEO_HELPER_PREPARE_DOWNLOAD_INFO', 
           downloadId: event.data.downloadId,
+          from: 'main',
           error: error.message
         }, window.location.origin);
       }

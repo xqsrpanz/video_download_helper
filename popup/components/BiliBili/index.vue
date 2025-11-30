@@ -1,5 +1,5 @@
 <template>
-  <div>BiliBili</div>
+  <div>当前页面是BiliBili视频页面</div>
 </template>
 
 <script setup lang="ts">

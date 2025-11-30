@@ -25,8 +25,10 @@
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
     "@king-design/vue": "^3.6.2",
+    "@tailwindcss/vite": "^4.1.17",
     "@vitejs/plugin-vue": "^6.0.2",
     "eslint": "^9.39.1",
+    "tailwindcss": "^4.1.17",
     "vue": "^3.5.25"
   }
 }
