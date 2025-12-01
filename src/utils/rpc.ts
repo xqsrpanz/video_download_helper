@@ -1,7 +1,8 @@
 import { getCurrentTab } from './getCurrentTab';
 
 type BasicRpcMessage = {
-  type: string;
+  type?: string;
+  scope?: string;
   downloadId?: string;
   from?: string;
   payload?: any;

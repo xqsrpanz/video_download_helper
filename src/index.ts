@@ -1,10 +1,11 @@
 import { useLog } from '@/hooks';
-import { useInjectScript } from './hooks';
+import { useInjectScript, useEnsureOptionsPageMounted } from './hooks';
 import { handleDownloadFromSeparateURL, handleFromReq } from '@/utils';
 
 const { info } = useLog();
 
 useInjectScript();
+const { ensureOptionsPageMounted } = useEnsureOptionsPageMounted();
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === 'TO_MAIN_PROCESS' && message?.tabId && message?.payload) {
@@ -12,7 +13,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     chrome.tabs.sendMessage(message.tabId, message).then((response) => {
       sendResponse(response);
     }).catch((error) => {
-      sendResponse({ error: error?.message || '转发消息失败' });
+      sendResponse({ error: error?.message || '向MAIN转发消息失败' });
+    });
+    return true;
+  }
+  if (message?.type === 'POPUP_TO_OPTIONS' && message?.payload) {
+    ensureOptionsPageMounted().then(() => {
+      chrome.runtime.sendMessage({ type: 'BACKGROUND_TO_OPTIONS', payload: message.payload }).then((response) => {
+        sendResponse(response);
+      }).catch((error) => {
+        sendResponse({ error: error?.message || '向OPTIONS转发消息失败' });
+      });
+    }).catch((error) => {
+      sendResponse({ error: error?.message || 'Unable to ensure options page mounted' });
     });
     return true;
   }

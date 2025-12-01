@@ -63,7 +63,8 @@
             audioURL,
             name: name.trim(),
             headers,
-            option: 0, // 0: 下载全部并合并, 1: 仅音频, 2: 仅视频            
+            option: 0, // 0: 下载全部并合并, 1: 仅音频, 2: 仅视频
+            source: 'bilibili',
           }
         }, window.location.origin);
       } catch (error) {
