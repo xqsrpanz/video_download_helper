@@ -1,6 +1,6 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { useLog } from '@/hooks';
-import { fetchUnit8ArrayFromURL } from '@/utils';
+import { useLog } from '@/hooks/useLog'; // offscreen document 不能直接从 @/hooks 路径导入，否则可能引入不支持的API
+import { fetchUnit8ArrayFromURL } from '@/utils/downCommon'; // 直接从具体文件导入，避免导入整个 @/utils（可能包含其他依赖 @/hooks 的代码）
 
 const { info, err, time, timeEnd } = useLog('[Offscreen][FFmpeg]', 'red');
 

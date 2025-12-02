@@ -1,5 +1,8 @@
+import { computed, ref, watch, type Ref, type ComputedRef } from 'vue';
+
 import { useLog } from './useLog';
 import { useEnsureScriptExists } from './useEnsureScriptExists.js';
+import { useStoreRef } from './useStore.js';
 import { URL_RULES_STORAGE_KEY, DEFAULT_URL_RULES, type RULE } from '@/config/constants';
 
 const { err, info, warn } = useLog();
@@ -57,46 +60,51 @@ export async function compileRules(rules: RULE[] = []) {
 }
 export type CompiledRule = Awaited<ReturnType<typeof compileRules>>[number];
 
-export async function loadRules() {
-  try {
-    const stored = await chrome.storage.sync.get(URL_RULES_STORAGE_KEY);
-    let rules = DEFAULT_URL_RULES;
-    if (stored[URL_RULES_STORAGE_KEY]) {
-      for (const rule of stored[URL_RULES_STORAGE_KEY]) {
-        const idx = rules.findIndex((r) => r.id === rule.id);
-        if (idx !== -1) {
-          Object.assign(rules[idx], rule);
-        } else {
-          rules.push(rule);
-        }
-      }
-    }
-    return await compileRules(rules);
-  } catch (error) {
-    err('Failed to Load Rules:', error);
-    return await compileRules(DEFAULT_URL_RULES);
-  }
-}
-
 export type GetMatchingRule = (url: string) => CompiledRule | false;
 
-export async function useRules(): Promise<{ rules: CompiledRule[], getMatchingRule: GetMatchingRule }> {
-  let rules = await loadRules();
-  chrome.storage.onChanged.addListener(async (changes, areaName) => {
-    if (areaName === 'sync' && changes[URL_RULES_STORAGE_KEY]) {
-      rules = await loadRules();
-      info('URL Rules Configuration Updated.');
-    }
-  });
-  const getMatchingRule: GetMatchingRule = (url: string) => {
-    return rules.find((rule) => {
-      try {
-        return rule.match(url);
-      } catch (error) {
-        warn(`URL Rule ${rule.id} Execution Failed:`, error);
-        return false;
+export type UseRulesReturnType = {
+  rules: ComputedRef<CompiledRule[]>;
+  getMatchingRule: Ref<GetMatchingRule>;
+  setRules: (rules: RULE[]) => void;
+};
+
+export function useRules(): UseRulesReturnType {
+  const { store: rawRules, set: setRawRules } = useStoreRef<RULE[]>(URL_RULES_STORAGE_KEY, 'local', DEFAULT_URL_RULES);
+  const compiledRules = ref<CompiledRule[]>([]);
+  const getMatchingRule = ref<GetMatchingRule>(() => false);
+  
+  watch(
+    () => rawRules.value,
+    async (rulesToCompile) => {
+      compiledRules.value = await compileRules(rulesToCompile ?? DEFAULT_URL_RULES);
+      getMatchingRule.value = (url: string) => {
+        return compiledRules.value.find((rule) => {
+          try {
+            return rule.match(url);
+          } catch (error) {
+            warn(`URL Rule ${rule.id} Execution Failed:`, error);
+            return false;
+          }
+        }) ?? false;
+      };
+    },
+    { immediate: true, deep: true }
+  );
+  
+  const rules = computed(() => compiledRules.value);
+
+  function setRules(data: Partial<RULE>[]) {
+    const res: RULE[] = rawRules.value ?? [];
+    for (const rule of data) {
+      const idx = rawRules.value?.findIndex((r) => r.id === rule.id) || -1;
+      if (idx !== -1) {
+        res[idx] = { ...rawRules.value?.[idx], ...rule } as RULE;
+      } else {
+        res.push(rule as RULE);
       }
-    }) ?? false;
-  };
-  return { rules, getMatchingRule };
+    }
+    setRawRules(res);
+  }
+
+  return { rules, getMatchingRule, setRules };
 }

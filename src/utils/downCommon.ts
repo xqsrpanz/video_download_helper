@@ -1,4 +1,4 @@
-import { useLog } from '@/hooks';
+import { useLog } from '@/hooks/useLog';
 
 const { time, timeEnd, err } = useLog('[DownCommon]', 'blue');
 

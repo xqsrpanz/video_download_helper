@@ -1,10 +1,9 @@
 import { useLog } from './useLog';
 import { useRules } from './useRules';
-import type { GetMatchingRule } from './useRules';
 
 const { log, info, err } = useLog('[useInjectScript]');
 
-let getMatchingRule: GetMatchingRule | null = null;
+const { getMatchingRule } = useRules();
 
 const injectedTabTracker = new Map();
 async function ensureScriptsInjected(tabId: number, frameId = 0) {
@@ -18,7 +17,7 @@ async function ensureScriptsInjected(tabId: number, frameId = 0) {
     return;
   }
 
-  const matchedRule = getMatchingRule?.(tab.url);
+  const matchedRule = getMatchingRule.value?.(tab.url);
   if (!matchedRule) {
     log('No Valid Rule for URL:', tab.url);
     injectedTabTracker.delete(tabId);
@@ -48,8 +47,6 @@ async function ensureScriptsInjected(tabId: number, frameId = 0) {
 }
 
 export async function useInjectScript() {
-  const { getMatchingRule: getMatchingRuleResult } = await useRules();
-  getMatchingRule = getMatchingRuleResult;
   chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
     if (changeInfo.status === 'complete') { // 页面加载完成，需要注入
       ensureScriptsInjected(tabId);

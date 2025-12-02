@@ -4,7 +4,7 @@ import { useStore } from './useStore'
 const timeout = 3 * 1000
 const optionsPageUrl = chrome.runtime.getURL('options/index.html')
 
-const { get: getIsOptionsPageMounted } = useStore(IS_OPTIONS_PAGE_MOUNTED_STORAGE_KEY, 'local', false)
+const { get: getIsOptionsPageMounted } = useStore<boolean>(IS_OPTIONS_PAGE_MOUNTED_STORAGE_KEY, 'local', false)
 
 async function findAndFocusOptionsPage(): Promise<boolean> {
   const tabs = await chrome.tabs.query({ url: optionsPageUrl })
