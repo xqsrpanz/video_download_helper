@@ -5,7 +5,7 @@
       class="mt-2"
       type="primary"
       :loading="loading"
-      @click="handleDownload"
+      @click="handleClickBtn"
     >{{ btnText }}</Button>
   </div>
 </template>
@@ -17,9 +17,11 @@ import { Button } from '@king-design/vue'
 import useMatchRule from './useMatchRule'
 import useGetComponent from './useGetComponent'
 import { rpcToMainProcess, notify } from '@/utils'
+import { useEnsureOptionsPageMounted } from '@/hooks'
 
 const { currentRule } = useMatchRule()
 const currentComponent = useGetComponent(() => currentRule.value?.id)
+const { ensureOptionsPageMounted } = useEnsureOptionsPageMounted()
 
 const loading = ref(false)
 
@@ -47,8 +49,16 @@ async function handleDownload() {
 }
 
 const btnText = computed(() => {
-  return currentRule.value?.id ? '后台下载' : '下载中心'
+  return currentRule.value ? '后台下载' : '下载中心'
 })
+
+function handleClickBtn() {
+  if (currentRule.value) {
+    handleDownload()
+  } else {
+    ensureOptionsPageMounted()
+  }
+}
 </script>
 
 <style scoped>

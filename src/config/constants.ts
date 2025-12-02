@@ -6,6 +6,8 @@ export type RULE = {
 }
 
 export const URL_RULES_STORAGE_KEY = 'VideoDownloadHelper:URLRules';
+export const IS_OPTIONS_PAGE_MOUNTED_STORAGE_KEY = 'VideoDownloadHelper:IsOptionsPageMounted';
+
 export const DEFAULT_URL_RULES: RULE[] = [
   {
     id: 'bilibili',

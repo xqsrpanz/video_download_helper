@@ -9,6 +9,10 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { Table, TableColumn } from '@king-design/vue'
+import { useStore } from '@/hooks'
+import { IS_OPTIONS_PAGE_MOUNTED_STORAGE_KEY } from '@/config/constants'
+
+const { set: setIsOptionsPageMounted } = useStore(IS_OPTIONS_PAGE_MOUNTED_STORAGE_KEY, 'local', false)
 
 const downloadInfoToHandle = ref<any[]>([])
 
@@ -29,10 +33,11 @@ watch(() => downloadInfoToHandle.value, (downloadInfoToHandle) => {
 }, { deep: true, immediate: true })
 
 onMounted(() => {
+  setIsOptionsPageMounted(true)
   chrome.runtime.sendMessage({ type: 'OPTIONS_PAGE_MOUNTED' })
 })
 
 onBeforeUnmount(() => {
-  chrome.runtime.sendMessage({ type: 'OPTIONS_PAGE_UNMOUNTED' })
+  setIsOptionsPageMounted(false)
 })
 </script>

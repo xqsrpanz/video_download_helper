@@ -1,7 +1,10 @@
+import { IS_OPTIONS_PAGE_MOUNTED_STORAGE_KEY } from '@/config/constants'
+import { useStore } from './useStore'
+
 const timeout = 3 * 1000
 const optionsPageUrl = chrome.runtime.getURL('options/index.html')
 
-let isOptionsPageMounted = false
+const { get: getIsOptionsPageMounted } = useStore(IS_OPTIONS_PAGE_MOUNTED_STORAGE_KEY, 'local', false)
 
 async function findAndFocusOptionsPage(): Promise<boolean> {
   const tabs = await chrome.tabs.query({ url: optionsPageUrl })
@@ -19,15 +22,17 @@ async function findAndFocusOptionsPage(): Promise<boolean> {
 
 async function ensureOptionsPageMounted(): Promise<boolean> {
   const pageAlreadyOpened = await findAndFocusOptionsPage()
+  const isOptionsPageMounted = await getIsOptionsPageMounted()
   if (isOptionsPageMounted && pageAlreadyOpened) {
     return Promise.resolve(true)
   }
   let resolver: (value: boolean) => void
+  let resolved = false
   const listener = (message: any, sender: any, sendResponse: any) => {
     if (message?.type === 'OPTIONS_PAGE_MOUNTED') {
       chrome.runtime.onMessage.removeListener(listener)
-      isOptionsPageMounted = true
       resolver(true)
+      resolved = true
     }
   }
   return new Promise((resolve, reject) => {
@@ -36,16 +41,12 @@ async function ensureOptionsPageMounted(): Promise<boolean> {
     chrome.runtime.onMessage.addListener(listener)
     setTimeout(() => {
       chrome.runtime.onMessage.removeListener(listener)
+      if (resolved) return
       reject(new Error('Options page not mounted'))
     }, timeout)
   })
 }
 
 export function useEnsureOptionsPageMounted() {
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message?.type === 'OPTIONS_PAGE_UNMOUNTED') {
-      isOptionsPageMounted = false
-    }
-  })
   return { ensureOptionsPageMounted }
 }

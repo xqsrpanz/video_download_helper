@@ -4,3 +4,4 @@ export * from './useEnsureScriptExists';
 export * from './useOffscreenDocument';
 export * from './useLog';
 export * from './useEnsureOptionsPageMounted';
+export * from './useStore';
