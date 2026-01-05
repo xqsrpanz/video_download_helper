@@ -23,5 +23,8 @@
     "popup",
     "options",
     "types"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }
